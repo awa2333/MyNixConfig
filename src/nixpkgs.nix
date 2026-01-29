@@ -1,11 +1,14 @@
 with import <nixpkgs> { };
 {
-  permittedInsecurePackages = [
-    "ventoy-qt5-1.1.07"
-  ];
+  packageOverrides = pkgs: {
+    nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/main.tar.gz") {
+      inherit pkgs;
+    };
+  };
   allowUnfreePredicate =
     pkg:
     builtins.elem (lib.getName pkg) [
+      "fcitx5-flypy"
       "ventoy-qt5"
       "libnvshmem"
       "libcufile"

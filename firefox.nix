@@ -1,6 +1,5 @@
 {
   pkgs,
-  lib,
   ...
 }:
 {
@@ -32,7 +31,6 @@
         DisablePasswordReveal = true;
         BlockAboutConfig = false;
         BlockAboutProfiles = true;
-        BlockAboutSupport = true;
         DisplayMenuBar = "never";
         DontCheckDefaultBrowser = true;
         OfferToSaveLogins = false;
@@ -42,12 +40,20 @@
             moz = short: "https://addons.mozilla.org/firefox/downloads/latest/${short}/latest.xpi";
           in
           {
-            "*".installation_mode = "blocked";
-            "vimium-c@gdh1995.cn" = {
-              install_url = moz "vimium-c";
+            "{d7742d87-e61d-4b78-b8a1-b469842139fa}" = {
+              install_url = moz "vimium-ff";
               installation_mode = "force_installed";
-              updates_disbaled = true;
-              private_browsing = true;
+              updates_disabled = true;
+            };
+            "{7a7a4a92-a2a0-41d1-9fd7-1e92480d612d}" = {
+              install_url = moz "styl-us";
+              installation_mode = "force_installed";
+              updates_disabled = true;
+            };
+            "FirefoxColor@mozilla.com" = {
+              install_url = moz "firefox-color";
+              installation_mode = "force_installed";
+              updates_disabled = true;
             };
           };
       };
@@ -61,6 +67,75 @@
             "sidebar.verticalTabs" = true;
             "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
             "sidebar.visibility" = "hide-sidebar";
+          };
+          extensions = {
+            force = true;
+            settings = {
+              "FirefoxColor@mozilla.com" = {
+                force = true;
+                settings = {
+                  firstRunDone = true;
+                  theme = {
+                    colors =
+                      let
+                        a = r: g: b: {
+                          inherit r g b;
+                        };
+                        r239 = a 239 241 245;
+                        r76 = a 76 79 105;
+                        r220 = a 220 224 232;
+                        r230 = a 230 233 239;
+                        r136 = a 136 57 239;
+                        r156 = a 156 160 176;
+                      in
+                      {
+                        toolbar = r239;
+                        toolbar_text = r76;
+                        frame = r220;
+                        tab_background_text = r76;
+                        toolbar_field = r230;
+                        toolbar_field_text = r76;
+                        tab_line = r136;
+                        popup = r239;
+                        popup_text = r76;
+                        button_background_active = r156;
+                        frame_inactive = r220;
+                        icons_attention = r136;
+                        icons = r136;
+                        ntp_background = r220;
+                        ntp_text = r76;
+                        popup_border = r136;
+                        popup_highlight_text = r76;
+                        popup_highlight = r156;
+                        sidebar_border = r136;
+                        sidebar_highlight_text = r76;
+                        sidebar_highlight = r136;
+                        sidebar_text = r76;
+                        sidebar = r239;
+                        tab_background_separator = r136;
+                        tab_loading = r136;
+                        tab_selected = r239;
+                        tab_text = r76;
+                        toolbar_bottom_separator = r239;
+                        toolbar_field_border_focus = r136;
+                        toolbar_field_border = r239;
+                        toolbar_field_focus = r239;
+                        toolbar_field_highlight_text = r239;
+                        toolbar_field_highlight = r136;
+                        toolbar_field_separator = r136;
+                        toolbar_vertical_separator = r136;
+                      };
+                    title = "Catppuccin latte mauve";
+                    images = {
+                      additional_backgrounds = [ "./bg-000.svg" ];
+                      custom_backgrounds = [ ];
+                    };
+                  };
+                  images = {
+                  };
+                };
+              };
+            };
           };
           bookmarks = {
             force = true;
@@ -81,8 +156,8 @@
           };
           search = {
             force = true;
-            default = "baidu";
-            privateDefault = "baidu";
+            default = "bd";
+            privateDefault = "bd";
             engines = {
               bilibili = {
                 name = "BiliBili";
@@ -103,8 +178,8 @@
                   "@bili"
                 ];
               };
-              baidu = {
-                name = "baidu";
+              bd = {
+                name = "bd";
                 urls = [
                   {
                     template = "https://www.baidu.com/baidu?wd={searchTerms} -site:csdn.net -site:gitcode.com -site:archlinux.org.cn&rn=20";
@@ -198,6 +273,23 @@
                   "@nf"
                 ];
               };
+              "NixOS Discourse" = {
+                urls = [
+                  {
+                    template = "https://discourse.nixos.org/search";
+                    params = [
+                      {
+                        name = "q";
+                        value = "{searchTerms}";
+                      }
+                    ];
+                  }
+                ];
+                icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+                definedAliases = [
+                  "@nd"
+                ];
+              };
               "ArchLinux Wiki" = {
                 urls = [
                   {
@@ -229,47 +321,11 @@
                 definedAliases = [ "@acw" ];
               };
               bing.metaData.hidden = true;
+              baidu.metaData.hidden = true;
               google.metaData.hidden = true;
               perplexity.metaData.hidden = true;
               ddg.metaData.hidden = true;
               wikipedia-zh-CN.metaData.hidden = true;
-            };
-          };
-          extensions = {
-            force = true;
-            settings = {
-              "vimium-c@gdh1995.cn" = {
-                force = true;
-                settings = {
-                  "name" = "Vimium C";
-                  "keyMappings" = lib.concatStringsSep "\n" [
-                    "#!no-check"
-                    "map J nextTab"
-                    "map K previousTab"
-                  ];
-                  "searchEngines" = lib.concatStringsSep "\n" [
-                    "np|nixpackages:https://search.nixos.org/packages?channel=unstable&query=%s"
-                    "no|nixoptions:https://search.nixos.org/options?channel=unstable&query=%s"
-                    "nw|nixoswiki:https://wiki.nixos.org/w/index.php?search=%s"
-                    "ng|nf|noogle|nixfunctions:https://noogle.dev/q?term=%s"
-                    "aw|archlinuxwiki:https://wiki.archlinux.org/index.php?search=%s"
-                    "acw|archlinuxcnwiki:https://wiki.archlinuxcn.org/wzh/index.php?search=%s"
-                    "ya|yd|yandex: https://yandex.com/search/?text=%s Yandex"
-                    "bili|bilibili|bz|Bili: https://search.bilibili.com/all?keyword=%s \\"
-                    "  blank=https://www.bilibili.com/ 哔哩哔哩"
-                    "gs|g.s|gscholar|g.x|gx|gxs: https://scholar.google.com/scholar?q=$s \\"
-                    "  scholar.google.com re=/^(?:\\.[a-z]{2,4})?\\/scholar\\b.*?[#&?]q=([^#&]*)/i \\"
-                    "  blank=https://scholar.google.com/ 谷歌学术"
-                    "\\:i: vimium://sed/s/^//,lower\\ $S re= Lower case"
-                    "v.p: vimium://parse\\ $S re= Redo Search"
-                    "gh|github: https://github.com/search?q=$s \\"
-                    "  blank=https://github.com/ GitHub 仓库"
-                    "js\\:|Js: javascript:\\ $S; JavaScript"
-                  ];
-                  "vimSync" = false;
-                  "ignoreCapsLock" = 2;
-                };
-              };
             };
           };
         };
