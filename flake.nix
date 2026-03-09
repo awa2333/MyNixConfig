@@ -1,6 +1,9 @@
 {
   description = "Home Manager configuration of luke";
   inputs = {
+    self = {
+      submodules = true;
+    };
     nixpkgs = {
       url = "git+https://mirrors.tuna.tsinghua.edu.cn/git/nixpkgs.git?ref=nixos-unstable&shallow=1";
     };
@@ -20,12 +23,17 @@
         };
       };
     };
+    local = {
+      url = ./local;
+      flake = false;
+    };
   };
   outputs =
     {
       nixpkgs,
       home-manager,
       nur,
+      local,
       ...
     }:
     let
@@ -43,6 +51,7 @@
           inherit pkgs;
           modules = [
             ./home.nix
+            local.outPath
           ];
         };
       };

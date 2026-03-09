@@ -11,10 +11,10 @@
     ./nvim
     ./firefox
     ./emacs
-    ./local
   ];
   home = {
-    stateVersion = "25.11";
+    username = "luke";
+    homeDirectory = "/home/luke";
     preferXdgDirectories = true;
     keyboard = {
       layout = "us";
