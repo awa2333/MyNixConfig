@@ -12,6 +12,7 @@
     ./firefox
     ./emacs
   ];
+  wayland.windowManager.sway.enable = true;
   home = {
     username = "luke";
     homeDirectory = "/home/luke";
@@ -21,11 +22,11 @@
     };
     packages = with pkgs; [
       clash-verge-rev
-      wechat
       unzip
       hyprlauncher
       nixfmt
       qq
+      wechat
     ];
   };
   services = {
@@ -75,6 +76,9 @@
       enable = true;
     };
     nh = {
+      enable = true;
+    };
+    obs-studio = {
       enable = true;
     };
     yazi = {

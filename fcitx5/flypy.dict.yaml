@@ -6,7 +6,7 @@ sort: original
 import_tables:
   - 'flypy/flypy.user.top'                # 用户置顶词
   # - 'flypy/flypy.full.top'              # 全码置顶词
-  # - 'flypy/flypy.fast.symbols'          # 快符
+  - 'flypy/flypy.fast.symbols'            # 快符
   - 'flypy/flypy.primary'                 # 首选字词
   - 'flypy/flypy.secondary'               # 次选字词
   - 'flypy/flypy.three'                   # 三码填空

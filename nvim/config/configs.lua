@@ -6,7 +6,6 @@ vim.schedule(function()
 end)
 
 require("nvchad.options")
-vim.o.timeoutlen = 100
 vim.g.encoding = "UTF-8"
 vim.o.fileencoding = "utf-8"
 vim.wo.number = true
@@ -40,5 +39,4 @@ if vim.g.neovide then
 	vim.g.neovide_cursor_vfx_particle_lifetime = 0.5
 	vim.g.neovide_cursor_vfx_particle_density = 50
 	vim.g.neovide_cursor_vfx_particle_speed = 100.0
-	vim.g.neovide_normal_opacity = 0.8
 end

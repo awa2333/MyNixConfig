@@ -106,6 +106,19 @@
             default = "bing";
             privateDefault = "bing";
             engines = {
+              oxfordlearnersdictionaries = {
+                name = "oxford learners dictionaries";
+                urls = [
+                  {
+                    template = "https://www.oxfordlearnersdictionaries.com/definition/english/{searchTerms}";
+                  }
+                ];
+                icon = ./ODF.png;
+                definedAliases = [
+                  "@ox"
+                  "@of"
+                ];
+              };
               bilibili = {
                 name = "BiliBili";
                 urls = [

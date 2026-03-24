@@ -60,6 +60,7 @@
       plugins =
         let
           myPlugins = with pkgs.vimPlugins; [
+            hmts-nvim
             typst-preview-nvim
             (nvim-treesitter.withPlugins (
               p: with p; [
