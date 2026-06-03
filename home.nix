@@ -21,12 +21,19 @@
       layout = "us";
     };
     packages = with pkgs; [
+      wpsoffice-cn
       clash-verge-rev
+      colmap
       unzip
+      (wechat.overrideAttrs {
+        src = fetchurl {
+          url = "https://dldir1v6.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.AppImage";
+          hash = "sha256-XxAvFnlljqurGPDgRr+DnuCKbdVvgXBPh02DLHY3Oz8=";
+        };
+      })
       hyprlauncher
       nixfmt
       qq
-      wechat
     ];
   };
   services = {
@@ -66,6 +73,9 @@
     };
   };
   programs = {
+    nix-index = {
+      enable = true;
+    };
     home-manager = {
       enable = true;
     };

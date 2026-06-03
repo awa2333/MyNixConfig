@@ -1,11 +1,11 @@
 return {
 	{
 		"NvChad/ui",
-		dir = vim.fn.stdpath("data") .. "/site/pack/hm/opt/nvchad-ui",
+		dir = vim.fn.stdpath("data") .. "/site/pack/hm/start/nvchad-ui",
 	},
 	{
 		"L3MON4D3/LuaSnip",
-		dir = vim.fn.stdpath("data") .. "/site/pack/hm/opt/luasnip",
+		dir = vim.fn.stdpath("data") .. "/site/pack/hm/start/luasnip",
 	},
 	{
 		"stevearc/conform.nvim",

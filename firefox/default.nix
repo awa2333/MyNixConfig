@@ -1,5 +1,6 @@
 {
   pkgs,
+  config,
   ...
 }:
 {
@@ -7,6 +8,7 @@
     firefox = {
       enable = true;
       languagePacks = [ "zh-CN" ];
+      configPath = "${config.xdg.configHome}/mozilla/firefox";
       policies = {
         Preferences = {
           "browser.translations.automaticallyPopup" = false;

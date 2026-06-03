@@ -5,7 +5,7 @@
       submodules = true;
     };
     nixpkgs = {
-      url = "git+https://mirrors.tuna.tsinghua.edu.cn/git/nixpkgs.git?ref=nixos-unstable&shallow=1";
+      url = "git+https://mirrors.nju.edu.cn/git/nixpkgs.git?ref=nixos-unstable&shallow=1";
     };
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -53,6 +53,18 @@
             ./home.nix
             local.outPath
           ];
+        };
+      };
+      devShells = {
+        x86_64-linux = {
+          default = pkgs.mkShell {
+            name = "Home-manager configuration";
+            packages = with pkgs; [
+              kdlfmt
+              lua-language-server
+              stylua
+            ];
+          };
         };
       };
     };

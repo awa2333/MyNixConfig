@@ -3,7 +3,7 @@ return {
 		lazy = true,
 	},
 	dev = {
-		path = vim.fn.stdpath("data") .. "/site/pack/hm/opt",
+		path = vim.fn.stdpath("data") .. "/site/pack/hm/start",
 		patterns = {
 			"",
 		},

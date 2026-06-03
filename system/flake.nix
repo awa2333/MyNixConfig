@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs = {
-      url = "git+https://mirrors.tuna.tsinghua.edu.cn/git/nixpkgs.git?ref=nixos-unstable&shallow=1";
+      url = "git+https://mirrors.nju.edu.cn/git/nixpkgs.git?ref=nixos-unstable&shallow=1";
     };
     nur = {
       url = "github:nix-community/NUR";
@@ -20,7 +20,7 @@
     }:
     {
       nixosConfigurations = {
-        NixOS = nixpkgs.lib.nixosSystem {
+        nixos = nixpkgs.lib.nixosSystem {
           modules = [
             ./configuration.nix
             nur.modules.nixos.default

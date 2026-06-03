@@ -5,7 +5,7 @@
 {
   programs = {
     emacs = {
-      enable = true;
+      enable = false;
       extraConfig = lib.fileContents ./init.el;
       extraPackages =
         epkgs: with epkgs; [

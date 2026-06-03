@@ -61,7 +61,6 @@
     };
   };
   networking = {
-    hostName = "NixOS"; # Define your hostname.
     networkmanager = {
       enable = true;
     };
@@ -110,6 +109,9 @@
     };
   };
   programs = {
+    nix-ld = {
+      enable = true;
+    };
     nano = {
       enable = false;
     };
@@ -130,13 +132,7 @@
   environment = {
     systemPackages = with pkgs; [
       libsForQt5.qt5.qtgraphicaleffects
-      sddm-astronaut
-      sddm-sugar-dark
-      sddm-chili-theme
-      catppuccin-sddm
-      elegant-sddm
-      where-is-my-sddm-theme
-      catppuccin-sddm-corners
+      libx11
     ];
     pathsToLink = [
       "/share/zsh"
@@ -146,7 +142,6 @@
     settings = {
       substituters = [
         "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
-        "https://mirror.sjtu.edu.cn/nix-channels/store"
         "https://nix-community.cachix.org"
         "https://devenv.cachix.org"
         "https://cache.nixos-cuda.org"
