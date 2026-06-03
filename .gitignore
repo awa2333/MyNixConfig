@@ -1,3 +1,6 @@
 system/local
 system/hardware-configuration.nix
 .envrc
+*.bak
+.direnv
+
