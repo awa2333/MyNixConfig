@@ -3,7 +3,7 @@
   allowUnfreePredicate =
     pkg:
     builtins.elem (lib.getName pkg) [
-      "wpsoffice-cn"
+    "wpsoffice-cn"
       "rime-flypy"
       "qq"
       "wechat"

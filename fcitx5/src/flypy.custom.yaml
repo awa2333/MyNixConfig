@@ -1,0 +1,39 @@
+patch:
+  menu/page_size: 3
+  speller/alphabet: "abcdefghijklmnopqrstuvwxyz'"
+  switches/@1:
+      name: full_shape
+      states: ["半角", "全角"]
+      reset: 0
+  punctuator/full_shape:
+    "*": "*"
+    "~": "~"
+    "%": "%"
+    "|": "|"
+    "$": "￥"
+    '\': "、"
+    ">": "》"
+    "<": "《"
+    "/": "/"
+    "{": "{"
+    "}": "}"
+    "]": "】"
+    "[": "【"
+    "`": "•"
+  punctuator/half_shape:
+    "*": "*"
+    "~": "~"
+    "%": "%"
+    "|": "|"
+    "$": "￥"
+    '\': "、"
+    ">": "》"
+    "<": "《"
+    "/": "/"
+    "{": "{"
+    "}": "}"
+    "]": "】"
+    "[": "【"
+    "`": "•"
+  key_binder/bindings/@last:
+

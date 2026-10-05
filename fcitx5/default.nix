@@ -1,25 +1,8 @@
 {
-  config,
   pkgs,
   ...
 }:
 {
-  xdg = {
-    dataFile = {
-      "fcitx5/rime/default.custom.yaml" = {
-        source = config.lib.file.mkOutOfStoreSymlink ./default.custom.yaml;
-        force = true;
-      };
-      "fcitx5/rime/flypy.custom.yaml" = {
-        source = config.lib.file.mkOutOfStoreSymlink ./flypy.custom.yaml;
-        force = true;
-      };
-      "fcitx5/rime/flypy.dict.yaml" = {
-        source = config.lib.file.mkOutOfStoreSymlink ./flypy.dict.yaml;
-        force = true;
-      };
-    };
-  };
   i18n = {
     inputMethod = {
       enable = true;
@@ -30,8 +13,11 @@
           fcitx5-material-color
           (fcitx5-rime.override {
             rimeDataPkgs = with pkgs.nur.repos.awa2333; [
-              rime-flypy
-              rime-prelude
+              (rime-flypy.overrideAttrs {
+                postConfigure = ''
+                  cp ${./src}/* . 
+                '';
+              })
             ];
           })
         ];
@@ -58,6 +44,14 @@
                 Theme = "Material-Color-sakuraPink";
               };
             };
+          };
+        };
+        themes = {
+          Material-Color-sakuraPink = {
+            theme = builtins.concatStringsSep "\n" [
+              "[InputPanel]"
+              "HighlightCandidateColor=#000000"
+            ];
           };
         };
       };

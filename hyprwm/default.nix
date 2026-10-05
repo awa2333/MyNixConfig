@@ -1,13 +1,18 @@
 {
   lib,
-  pkgs,
   ...
 }:
 {
+  imports = [ ./noctalia.nix ];
   wayland = {
     windowManager = {
       hyprland = {
         enable = true;
+        package = null;
+        portalPackage = null;
+        xwayland = {
+          enable = true;
+        };
         configType = "lua";
         settings = {
           monitor =
@@ -20,8 +25,9 @@
               };
             in
             [
-              (monitorFn "eDP-1" "1920x1080@144" "0x0" (builtins.div 4.0 3.0))
-              (monitorFn "eDP-2" "1920x1080@144" "0x0" (builtins.div 4.0 3.0))
+              (monitorFn "HDMI-A-1" "2560x1440@144" "0x0" (builtins.div 4.0 3.0))
+              (monitorFn "eDP-1" "1920x1080@144" "1920x0" (builtins.div 4.0 3.0))
+              (monitorFn "eDP-2" "1920x1080@144" "1920x0" (builtins.div 4.0 3.0))
             ];
           env =
             let
@@ -40,9 +46,12 @@
               (envFn "QT_QPA_PLATFORM" "wayland;xcb")
               (envFn "SDL_VIDEODRIVER" "wayland")
               (envFn "CLUTTER_BACKEND" "wayland")
+              (envFn "QT_IM_MODULES" "wayland;fcitx;ibus")
+              (envFn "QT_IM_MODULE" "fcitx")
             ];
           config = {
             general = {
+              layout = "scrolling";
               border_size = 2;
               gaps_in = 2;
               gaps_out = 2;
@@ -74,6 +83,27 @@
               no_donation_nag = true;
             };
           };
+          workspace_rule =
+            let
+              Fn = workspace: default: monitor: {
+                inherit workspace monitor default;
+              };
+              builtinMonitos = builtins.map (Fn "3" true) [
+                "eDP-1"
+                "eDP-2"
+              ];
+            in
+            builtinMonitos
+            ++ (builtins.map (a: Fn (builtins.head a) (lib.last a) "HDMI-A-1") [
+              [
+                "1"
+                true
+              ]
+              [
+                "2"
+                false
+              ]
+            ]);
           bind =
             let
               switchWorkspace =
@@ -105,33 +135,41 @@
               (superKeyExec "Y" "kitty")
               (superKeyExec "F" "firefox")
               (superKeyExec "SHIFT+S" "hyprshot -m region --clipboard-only")
-              (superKeyExec "I" "hyprlauncher")
               (superKeyFocus "H" "left")
               (superKeyFocus "J" "down")
               (superKeyFocus "K" "up")
               (superKeyFocus "L" "right")
               (superKeyEvent "window.fullscreen" "SPACE" ''{mode="fullscreen"}'')
               (superKeyEvent "window.close" "P" "")
+              (superKeyExec "U" "noctalia msg panel-toggle launcher")
             ]
             ++ switchWorkspace;
           on =
             let
-              wallpaper = "${pkgs.callPackage ./wallpaper.nix { }}/wallpaper.mp4";
+              autoStartFn =
+                let
+                  generatedLuaInline = cmd: ''hl.exec_cmd("${cmd}")'';
+                in
+                cmds: [
+                  "hyprland.start"
+                  (lib.generators.mkLuaInline (
+                    builtins.concatStringsSep "\n" ([ "function()" ] ++ (lib.map generatedLuaInline cmds) ++ [ "end" ])
+                  ))
+                ];
             in
             {
-              _args = [
-                "hyprland.start"
-                (lib.generators.mkLuaInline (
-                  builtins.concatStringsSep "\n" [
-                    "function()"
-                    ''hl.exec_cmd("mpvpaper -vs -o \"no-audio loop\" eDP-1 ${wallpaper}")''
-                    ''hl.exec_cmd("mpvpaper -vs -o \"no-audio loop\" eDP-2 ${wallpaper}")''
-                    "end"
-                  ]
-                ))
+              _args = autoStartFn [
+                "noctalia"
               ];
             };
         };
+      };
+    };
+  };
+  xdg = {
+    configFile = {
+      "hypr/hyprland.lua" = {
+        force = true;
       };
     };
   };

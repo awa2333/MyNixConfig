@@ -1,11 +1,8 @@
 {
   description = "Home Manager configuration of luke";
   inputs = {
-    self = {
-      submodules = true;
-    };
     nixpkgs = {
-      url = "git+https://mirrors.nju.edu.cn/git/nixpkgs.git?ref=nixos-unstable&shallow=1";
+      url = "git+https://mirrors.nju.edu.cn/git/nixpkgs.git?ref=nixpkgs-unstable&shallow=1";
     };
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -23,9 +20,13 @@
         };
       };
     };
-    local = {
-      url = ./local;
-      flake = false;
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
     };
   };
   outputs =
@@ -33,7 +34,8 @@
       nixpkgs,
       home-manager,
       nur,
-      local,
+      nixvim,
+      sops-nix,
       ...
     }:
     let
@@ -51,7 +53,8 @@
           inherit pkgs;
           modules = [
             ./home.nix
-            local.outPath
+            nixvim.homeModules.nixvim
+            sops-nix.homeManagerModules.sops
           ];
         };
       };
@@ -60,9 +63,9 @@
           default = pkgs.mkShell {
             name = "Home-manager configuration";
             packages = with pkgs; [
-              kdlfmt
               lua-language-server
               stylua
+              yaml-language-server
             ];
           };
         };

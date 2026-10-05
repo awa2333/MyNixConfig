@@ -1,9 +1,11 @@
 {
+  lib,
   pkgs,
   config,
   ...
 }:
 {
+  imports = [ ./searchEngine.nix ];
   programs = {
     firefox = {
       enable = true;
@@ -37,23 +39,21 @@
         DontCheckDefaultBrowser = true;
         OfferToSaveLogins = false;
         DownloadDirectory = "\${home}/Downloads";
-        ExtensionSettings =
-          let
-            moz = short: "https://addons.mozilla.org/firefox/downloads/latest/${short}/latest.xpi";
-          in
-          {
-            "{d7742d87-e61d-4b78-b8a1-b469842139fa}" = {
-              install_url = moz "vimium-ff";
-              installation_mode = "force_installed";
-              updates_disabled = true;
-            };
-            "uBlock0@raymondhill.net" = {
-              default_area = "menupanel";
-              install_url = "https://f2.crxsoso.com/firefox/downloads/latest/ublock-origin/platform:2/ublock-origin.xpi";
-              updates_disabled = true;
-              installation_mode = "force_installed";
-            };
+        ExtensionSettings = {
+          "*" = {
+            installation_mode = "blocked";
           };
+          "vimium-c@gdh1995.cn" = {
+            installation_mode = "force_installed";
+            updates_disabled = true;
+          };
+          "uBlock0@raymondhill.net" = {
+            default_area = "menupanel";
+            install_url = "https://f2.crxsoso.com/firefox/downloads/latest/ublock-origin/platform:2/ublock-origin.xpi";
+            installation_mode = "force_installed";
+            updates_disabled = true;
+          };
+        };
       };
       profiles = {
         default = {
@@ -70,38 +70,52 @@
           extensions = {
             force = true;
             settings = {
+              "vimium-c@gdh1995.cn" = {
+                force = true;
+                settings = {
+                  keyMappings = lib.concatStringsSep "\n" [
+                    "map J nextTab"
+                    "map K previousTab"
+                  ];
+                  userDefinedCss = lib.fileContents ("${pkgs.callPackage ./vimium-c-catppuccin.nix { }}/latte.css");
+                };
+              };
               "uBlock0@raymondhill.net" = {
                 force = true;
                 settings =
                   let
-                    blk = short: "cn.bing.com#?#li:has(cite:contains(${short}))";
+                    searchAndBlockFn =
+                      searchEngine: blockDomain: "${searchEngine}#?#li:has(cite:contains(${blockDomain}))";
+                    bingBlockDomain =
+                      BlockDomain:
+                      builtins.map (searchEngine: searchAndBlockFn searchEngine BlockDomain) [
+                        "cn.bing.com"
+                        "www.bing.com"
+                      ];
                   in
                   {
-                    user-filters = builtins.concatStringsSep "\n" [
-                      (blk "csdn.net")
-                      (blk "gitcode.com")
-                      (blk "archlinux.org.cn")
-                    ];
+                    user-filters = builtins.concatStringsSep "\n" (
+                      lib.lists.flatten [
+                        (bingBlockDomain "csdn.net")
+                        (bingBlockDomain "gitcode.com")
+                        (bingBlockDomain "archlinux.org.cn")
+                      ]
+                    );
                   };
               };
             };
           };
           bookmarks = {
             force = true;
-            settings = [
-              {
-                name = "Home-manager Options";
-                url = "https://nix-community.github.io/home-manager/options.xhtml";
-              }
-              {
-                name = "NixOS Options";
-                url = "https://nixos.org/manual/nixos/unstable/options.html";
-              }
-              {
-                name = "Nixpkgs Manual";
-                url = "https://nixos.org/manual/nixpkgs/unstable";
-              }
-            ];
+            settings =
+              let
+                bookmarksFn = name: url: { inherit name url; };
+              in
+              [
+                (bookmarksFn "Home-manager Options" "https://nix-community.github.io/home-manager/options.xhtml")
+                (bookmarksFn "NixOS Options" "https://nixos.org/manual/nixos/unstable/options.html")
+                (bookmarksFn "Nixpkgs Manual" "https://nixos.org/manual/nixpkgs/unstable")
+              ];
           };
           search = {
             force = true;

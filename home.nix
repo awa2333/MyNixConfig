@@ -1,10 +1,12 @@
 {
+  config,
   pkgs,
   lib,
   ...
 }:
 {
   imports = [
+    ./musicfox.nix
     ./hyprwm
     ./fcitx5
     ./zshShell
@@ -12,44 +14,35 @@
     ./firefox
     ./emacs
   ];
-  wayland.windowManager.sway.enable = true;
   home = {
+    stateVersion = "26.05";
     username = "luke";
     homeDirectory = "/home/luke";
     preferXdgDirectories = true;
+    shell = {
+      enableZshIntegration = true;
+    };
     keyboard = {
       layout = "us";
     };
     packages = with pkgs; [
+      sops
       wpsoffice-cn
-      clash-verge-rev
-      colmap
+      wechat
+      bilibili-tui
+      telegram-desktop
       unzip
-      (wechat.overrideAttrs {
-        src = fetchurl {
-          url = "https://dldir1v6.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.AppImage";
-          hash = "sha256-XxAvFnlljqurGPDgRr+DnuCKbdVvgXBPh02DLHY3Oz8=";
-        };
-      })
       hyprlauncher
-      nixfmt
       qq
     ];
-  };
-  services = {
-    home-manager = {
-      autoExpire = {
-        enable = true;
-        frequency = "weekly";
-        store = {
-          cleanup = true;
-        };
-        timestamp = "-7 days";
-      };
-      autoUpgrade = {
-        enable = true;
-        frequency = "daily";
-      };
+    pointerCursor = {
+      enable = true;
+      package = pkgs.bibata-cursors;
+      name = "Bibata-Modern-Ice";
+      size = 24;
+    };
+    sessionVariables = {
+      NIXOS_OZONE_WL = 1;
     };
   };
   nixpkgs = {
@@ -66,17 +59,57 @@
         '';
       };
     };
-  };
-  nix = {
-    gc = {
-      automatic = true;
+    mimeApps = {
+      enable = true;
+      defaultApplications = {
+        "application/pdf" = "firefox.desktop";
+        "x-scheme-handler/tg" = "org.telegram.desktop.desktop";
+        "x-scheme-handler/tonsite" = "org.telegram.desktop.desktop";
+      };
     };
   };
   programs = {
-    nix-index = {
+    home-manager = {
       enable = true;
     };
-    home-manager = {
+    go-musicfox = {
+      enable = true;
+      settings = {
+        startup = {
+          enable = true;
+          progressOutBounce = true;
+          loadingSeconds = 0.5;
+          welcome = "musicfox";
+          animation = "sequence";
+          reduceMotion = false;
+          signIn = false;
+          checkUpdate = false;
+        };
+        main = {
+          altScreen = true;
+          enableMouseEvent = true;
+          debug = false;
+          frameRate = 5;
+          locale = "zh";
+          notification = {
+            enable = true;
+            icon = "logo.png";
+          };
+          lyric = {
+            show = true;
+          };
+        };
+        reporter = {
+          netease = {
+            enable = false;
+          };
+          lastfm = {
+            enable = false;
+          };
+        };
+      };
+    };
+    element-desktop = {
       enable = true;
     };
     hstr = {
@@ -86,9 +119,8 @@
       enable = true;
     };
     nh = {
-      enable = true;
-    };
-    obs-studio = {
+      osFlake = /etc/nixos;
+      homeFlake = "${config.xdg.configHome}/home-manager";
       enable = true;
     };
     yazi = {
@@ -123,27 +155,34 @@
         };
       };
     };
-    rofi = {
-      enable = true;
-    };
     git = {
       enable = true;
       settings = {
         init = {
           defaultBrance = "main";
         };
+        user = {
+          email = "62987171+awa2333@users.noreply.github.com";
+          name = "awa2333";
+        };
       };
       lfs = {
         enable = true;
       };
     };
+    gh-dash = {
+      enable = true;
+    };
     gh = {
       enable = true;
+      gitCredentialHelper = {
+        enable = true;
+      };
+      settings = {
+        git_protocol = "ssh";
+      };
     };
     lazygit = {
-      enable = true;
-    };
-    ripgrep = {
       enable = true;
     };
     direnv = {
@@ -152,6 +191,13 @@
       nix-direnv = {
         enable = true;
       };
+    };
+    less = {
+      enable = true;
+      config = builtins.concatStringsSep "\n" [
+        "#env"
+        "LESSUTFCHARDEF=E0BA:p,E0BC:p,F015:p,F023:p,F313:p"
+      ];
     };
     kitty = {
       enable = true;
@@ -163,6 +209,15 @@
         cursor_trail = 1;
         background_opacity = 0.7;
       };
+    };
+  };
+  sops = {
+    age = {
+      keyFile = "${config.home.homeDirectory}/.age-key.txt";
+    };
+    defaultSopsFile = ./secrets/secrets.yaml;
+    secrets = {
+      neteaseCookie = { };
     };
   };
 }

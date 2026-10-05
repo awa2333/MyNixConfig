@@ -1,6 +1,5 @@
-system/local
+system/secrets/*
 system/hardware-configuration.nix
 .envrc
 *.bak
 .direnv/
-

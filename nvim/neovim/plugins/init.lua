@@ -12,12 +12,14 @@ return {
 		event = "BufWritePre",
 		opts = {
 			formatters_by_ft = {
+				r = { "air" },
 				markdown = { "rumdl" },
 				typst = { "typstyle" },
 				lua = { "stylua" },
 				nix = { "nixfmt" },
 				javascript = { "biome" },
 				bash = { "shfmt" },
+				cpp = { "clang-format" },
 			},
 			format_on_save = {
 				timeout_ms = 500,
@@ -30,6 +32,8 @@ return {
 		config = function()
 			require("nvchad.configs.lspconfig").defaults()
 			vim.lsp.enable({
+				"clangd",
+				"r_language_server",
 				"rumdl",
 				"markdown_oxide",
 				"bashls",
@@ -40,6 +44,7 @@ return {
 				"nil_ls",
 				"lua_ls",
 				"basedpyright",
+				"yamlls",
 			})
 		end,
 	},

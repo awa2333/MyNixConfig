@@ -5,14 +5,10 @@
   ...
 }:
 {
-  home = {
-    shell = {
-      enableZshIntegration = true;
-    };
-  };
   programs = {
     zsh = {
       enable = true;
+      package = null;
       dotDir = "${config.xdg.configHome}/zsh";
       shellAliases = {
         ".." = "cd ..";
@@ -48,6 +44,13 @@
         lib.mkMerge [
           zshConfigBefore
           zshConfig
+        ];
+      envExtra =
+        let
+          envFn = name: value: ''export ${name}="${value}"'';
+        in
+        builtins.concatStringsSep "\n" [
+          (envFn "MUSICFOX_COOKIE" ''$(${pkgs.coreutils}/bin/cat "${config.sops.secrets.neteaseCookie.path}")'')
         ];
       plugins = [
         {
