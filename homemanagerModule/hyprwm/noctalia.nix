@@ -1,13 +1,8 @@
-{ pkgs, ... }: {
+{
   programs = {
     noctalia = {
       enable = true;
       settings = {
-        theme = {
-          mode = "light";
-          source = "builtin";
-          builtin = "Catppuccin";
-        };
         wallpaper = {
           enabled = false;
         };
@@ -26,18 +21,6 @@
         };
         location = {
           auto_locate = true;
-        };
-        plugins = {
-          enabled = [
-            "noctalia/mpvpaper"
-          ];
-          auto_update = "all";
-        };
-        plugin_settings = {
-          "noctalia/mpvpaper" = {
-            video_directory = "${pkgs.callPackage ./wallpaper.nix { }}";
-            run_as_systemd = true;
-          };
         };
       };
     };

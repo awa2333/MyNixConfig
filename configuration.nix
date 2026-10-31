@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -6,22 +7,15 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./secrets
   ];
   boot = {
     consoleLogLevel = 3;
-    initrd = {
-      verbose = false;
-    };
     kernelParams = [
       "quiet"
       "splash"
       "rd.udev.log_level=3"
       "rd.systemd.show_status=auto"
     ];
-    plymouth = {
-      enable = true;
-    };
     loader = {
       grub = {
         enable = true;
@@ -57,20 +51,27 @@
   };
   networking = {
     hostName = "nixos";
+    nameservers = [
+      "127.0.0.1"
+    ];
     networkmanager = {
       enable = true;
+      dns = "none";
     };
-    proxy = {
-      allProxy = "http://127.0.0.1:7890";
+  };
+  systemd = {
+    services = {
+      mihomo = {
+        serviceConfig = {
+          AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+          CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
+        };
+      };
     };
-    nftables = {
-      enable = true;
-    };
-    firewall = {
-      enable = true;
-      allowedTCPPorts = [
-        80
-        443
+    tmpfiles = {
+      rules = [
+        "L+ /var/lib/mihomo/GeoSite.dat - - - - ${pkgs.v2ray-rules-dat}/share/v2ray/geosite.dat"
+        "L+ /var/lib/mihomo/GeoIP.dat - - - - ${pkgs.v2ray-rules-dat}/share/v2ray/geoip.dat"
       ];
     };
   };
@@ -84,6 +85,10 @@
         builtins.elem (lib.getName pkg) [
           "nvidia-x11"
           "nvidia-settings"
+          "rime-flypy"
+          "wpsoffice-cn"
+          "qq"
+          "wechat"
         ];
     };
   };
@@ -101,7 +106,6 @@
   hardware = {
     bluetooth = {
       enable = true;
-      powerOnBoot = true;
     };
     graphics = {
       enable = true;
@@ -133,11 +137,18 @@
     enable = true;
   };
   services = {
+    upower = {
+      enable = true;
+    };
+    tuned = {
+      enable = true;
+    };
     mihomo = {
       enable = true;
-      configFile = ./secrets/mihomo.yaml;
+      configFile = config.sops.secrets.mihomoConfig.path;
       webui = pkgs.metacubexd;
       tunMode = true;
+      processesInfo = true;
     };
     pipewire = {
       enable = true;
@@ -176,7 +187,7 @@
               HeaderText = "NixOS";
               AllowEmptyPassword = true;
               ForceRightToLeft = true;
-              Background = "${./secrets/sddm-background.png}";
+              Background = "${pkgs.miscFiles}/sddm-background.png";
             };
           }
         }/share/sddm/themes/eucalyptus-drop";
@@ -188,15 +199,21 @@
     };
   };
   users = {
+    mutableUsers = false;
     users = {
+      root = {
+        isSystemUser = true;
+        hashedPasswordFile = config.sops.secrets.rootPassword.path;
+      };
       luke = {
+        isNormalUser = true;
+        hashedPasswordFile = config.sops.secrets.lukePassword.path;
         ignoreShellProgramCheck = true;
         shell = pkgs.zsh;
-        isNormalUser = true;
         extraGroups = [
           "wheel"
           "networkmanager"
-        ]; # Enable ‘sudo’ for the user.
+        ];
       };
     };
   };
@@ -210,6 +227,10 @@
       noto-fonts-cjk-sans
       maple-mono.Normal-NF-CN
       nerd-fonts.jetbrains-mono
+
+      gyre-fonts
+      source-han-serif
+      tex-gyre-math.termes
     ];
   };
   nix = {
@@ -219,7 +240,30 @@
         "flakes"
       ];
       trusted-users = [ "@wheel" ];
-      auto-optimise-store = true;
+      trusted-public-keys = [
+        "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+        "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+      ];
+      trusted-substituters = [
+        "https://cache.nixos-cuda.org"
+        "https://devenv.cachix.org"
+      ];
+      substituters =
+        let
+          chineseSubstituters = [
+            "https://mirrors.cernet.edu.cn/nix-channels/store"
+            "https://mirrors.ustc.edu.cn/nix-channels/store"
+            "https://mirrors.ha.edu.cn/nix-channels/store"
+            "https://mirror.nju.edu.cn/nix-channels/store"
+            "https://mirror.nyist.edu.cn/nix-channels/store"
+            "https://mirror.sjtu.edu.cn/nix-channels/store"
+          ];
+          addPriority = url: "${url}?priority=10";
+        in
+        (builtins.map addPriority chineseSubstituters)
+        ++ [
+          "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+        ];
     };
   };
   security = {
@@ -227,91 +271,44 @@
       enable = true;
     };
   };
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
-
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
-
-  # Configure keymap in X11
-  # services.xserver.xkb.layout = "us";
-  # services.xserver.xkb.options = "eurosign:e,caps:escape";
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-  # Enable sound.
-  # services.pulseaudio.enable = true;
-  # OR
-  # services.pipewire = {
-  #   enable = true;
-  #   pulse.enable = true;
-  # };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.libinput.enable = true;
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  # users.users.alice = {
-  #   isNormalUser = true;
-  #   extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
-  #   packages = with pkgs; [
-  #     tree
-  #   ];
-  # };
-
-  # programs.firefox.enable = true;
-
-  # List packages installed in system profile.
-  # You can use https://search.nixos.org/ to find more packages (and options).
-  # environment.systemPackages = with pkgs; [
-  #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #   wget
-  # ];
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  # Copy the NixOS configuration file and link it from the resulting system
-  # (/run/current-system/configuration.nix). This is useful in case you
-  # accidentally delete configuration.nix.
-  #system.copySystemConfiguration = true;
-
-  # This option defines the first version of NixOS you have installed on this particular machine,
-  # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
-  #
-  # Most users should NEVER change this value after the initial install, for any reason,
-  # even if you've upgraded your system to a new NixOS release.
-  #
-  # This value does NOT affect the Nixpkgs version your packages and OS are pulled from,
-  # so changing it will NOT upgrade your system - see https://nixos.org/manual/nixos/stable/#sec-upgrading for how
-  # to actually do that.
-  #
-  # This value being lower than the current NixOS release does NOT mean your system is
-  # out of date, out of support, or vulnerable.
-  #
-  # Do NOT change this value unless you have manually inspected all the changes it would make to your configuration,
-  # and migrated your data accordingly.
-  #
-  # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
-  system.stateVersion = "26.05"; # Did you read the comment?
+  stylix = {
+    enable = true;
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-storm.yaml";
+    polarity = "dark";
+    fonts = {
+      monospace = {
+        package = pkgs.nerd-fonts.jetbrains-mono;
+        name = "JetBrainsMono Nerd Font";
+      };
+    };
+    targets = {
+      grub = {
+        enable = false;
+      };
+    };
+  };
+  sops = {
+    age = {
+      keyFile = "${config.home-manager.users.luke.xdg.configHome}/sops/age/keys.txt";
+    };
+    defaultSopsFile = ./secrets.yaml;
+    secrets = {
+      neteaseCookie = {
+        owner = config.users.users.luke.name;
+      };
+      lukePassword = {
+        neededForUsers = true;
+      };
+      rootPassword = {
+        neededForUsers = true;
+      };
+      mihomoConfig = {
+        format = "binary";
+        sopsFile = ./mihomo-secret.yaml;
+      };
+    };
+  };
+  system = {
+    stateVersion = "26.05";
+  };
 }

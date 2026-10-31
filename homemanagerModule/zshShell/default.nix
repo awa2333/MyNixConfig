@@ -2,6 +2,7 @@
   lib,
   pkgs,
   config,
+  osConfig,
   ...
 }:
 {
@@ -50,7 +51,8 @@
           envFn = name: value: ''export ${name}="${value}"'';
         in
         builtins.concatStringsSep "\n" [
-          (envFn "MUSICFOX_COOKIE" ''$(${pkgs.coreutils}/bin/cat "${config.sops.secrets.neteaseCookie.path}")'')
+          (envFn "MUSICFOX_COOKIE" "$(<${osConfig.sops.secrets.neteaseCookie.path})")
+          (envFn "GITHUB_TOKEN" "$(gh auth token)")
         ];
       plugins = [
         {
@@ -130,7 +132,7 @@
       enable = true;
       settings = {
         logo = {
-          source = ./sakurafetch.png;
+          source = "${pkgs.miscFiles}/sakurafetch.png";
           width = 42;
           height = 21;
         };

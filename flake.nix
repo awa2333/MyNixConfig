@@ -1,8 +1,68 @@
 {
-  description = "Home Manager configuration of luke";
+  outputs =
+    {
+      self,
+      stylix,
+      nixpkgs,
+      home-manager,
+      sops-nix,
+      nixvim,
+      nur,
+      devenv,
+      systems,
+      ...
+    }@inputs:
+    let
+      forEachSystem = nixpkgs.lib.genAttrs (import systems);
+    in
+    {
+      overlays = {
+        default = final: prev: {
+          miscFiles = final.callPackage ./misc.nix { };
+        };
+      };
+      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          { nixpkgs.overlays = [ self.overlays.default ]; }
+          ./configuration.nix
+          sops-nix.nixosModules.sops
+          nur.modules.nixos.default
+          stylix.nixosModules.stylix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.users.luke = ./homemanagerModule;
+            home-manager.sharedModules = [
+              nixvim.homeModules.nixvim
+            ];
+          }
+        ];
+      };
+      devShells = forEachSystem (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          default = devenv.lib.mkShell {
+            inherit inputs pkgs;
+            modules = [
+              {
+                env = {
+                  DEVENV_SKIP_TASKS = 1;
+                };
+              }
+            ];
+          };
+        }
+      );
+    };
   inputs = {
     nixpkgs = {
-      url = "git+https://mirrors.nju.edu.cn/git/nixpkgs.git?ref=nixpkgs-unstable&shallow=1";
+      url = "github:NixOS/nixpkgs/nixos-unstable";
     };
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -28,47 +88,28 @@
         };
       };
     };
-  };
-  outputs =
-    {
-      nixpkgs,
-      home-manager,
-      nur,
-      nixvim,
-      sops-nix,
-      ...
-    }:
-    let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [
-          nur.overlays.default
-        ];
-      };
-    in
-    {
-      homeConfigurations = {
-        luke = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-          modules = [
-            ./home.nix
-            nixvim.homeModules.nixvim
-            sops-nix.homeManagerModules.sops
-          ];
-        };
-      };
-      devShells = {
-        x86_64-linux = {
-          default = pkgs.mkShell {
-            name = "Home-manager configuration";
-            packages = with pkgs; [
-              lua-language-server
-              stylua
-              yaml-language-server
-            ];
-          };
+    nixvim = {
+      url = "github:nix-community/nixvim";
+    };
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
         };
       };
     };
+
+    systems = {
+      url = "github:nix-systems/default";
+    };
+    devenv = {
+      url = "github:cachix/devenv";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
+  };
 }

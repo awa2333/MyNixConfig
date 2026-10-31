@@ -38,6 +38,10 @@
         extraPackages =
           with pkgs;
           [
+            markdown-oxide
+            rumdl
+            yaml-language-server
+            yamlfmt
             ripgrep
             tree-sitter
             shfmt

@@ -1,6 +1,7 @@
 { lib, ... }:
 {
   imports = [
+    ./nixvim
     ./neovim
   ];
   options = {

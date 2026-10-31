@@ -9,7 +9,7 @@
   programs = {
     firefox = {
       enable = true;
-      languagePacks = [ "zh-CN" ];
+      languagePacks = [ "en-US" ];
       configPath = "${config.xdg.configHome}/mozilla/firefox";
       policies = {
         Preferences = {
@@ -18,7 +18,7 @@
           "browser.engagement.sidebar-button.has-used" = true;
           "browser.toolbarbuttons.introduced.sidebar-button" = true;
         };
-        RequestedLocales = [ "zh-CN" ];
+        RequestedLocales = [ "en-US" ];
         AppAutoUpdate = false;
         BackgroundAppUpdate = false;
         DisableFirefoxStudies = true;
@@ -85,13 +85,8 @@
                 settings =
                   let
                     searchAndBlockFn =
-                      searchEngine: blockDomain: "${searchEngine}#?#li:has(cite:contains(${blockDomain}))";
-                    bingBlockDomain =
-                      BlockDomain:
-                      builtins.map (searchEngine: searchAndBlockFn searchEngine BlockDomain) [
-                        "cn.bing.com"
-                        "www.bing.com"
-                      ];
+                      searchEngine: blockDomain: ''${searchEngine}##li:has(a[href*="${blockDomain}"])'';
+                    bingBlockDomain = searchAndBlockFn "bing.com";
                   in
                   {
                     user-filters = builtins.concatStringsSep "\n" (
@@ -129,7 +124,7 @@
                     template = "https://www.oxfordlearnersdictionaries.com/definition/english/{searchTerms}";
                   }
                 ];
-                icon = ./ODF.png;
+                icon = "${pkgs.miscFiles}/ODF.png";
                 definedAliases = [
                   "@ox"
                   "@of"
@@ -148,7 +143,7 @@
                     ];
                   }
                 ];
-                icon = ./bilibili.png;
+                icon = "${pkgs.miscFiles}/bilibili.png";
                 definedAliases = [
                   "@bl"
                   "@bili"
@@ -166,7 +161,7 @@
                     ];
                   }
                 ];
-                icon = ./github-mark.svg;
+                icon = "${pkgs.miscFiles}/github-mark.svg";
                 definedAliases = [ "@gh" ];
               };
               "Nix Packages" = {
@@ -268,7 +263,7 @@
                     ];
                   }
                 ];
-                icon = ./archlinux-icon-crystal-256.svg;
+                icon = "${pkgs.miscFiles}/archlinux-icon-crystal-256.svg";
                 definedAliases = [ "@aw" ];
               };
               "ArchLinuxCN Wiki" = {
@@ -283,7 +278,7 @@
                     ];
                   }
                 ];
-                icon = ./archlinux-icon-crystal-256.svg;
+                icon = "${pkgs.miscFiles}/archlinux-icon-crystal-256.svg";
                 definedAliases = [ "@acw" ];
               };
               baidu.metaData.hidden = true;

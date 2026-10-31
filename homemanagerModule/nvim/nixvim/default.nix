@@ -24,7 +24,6 @@
           extraPackages =
             with pkgs;
             [
-              nil
               python3
               ripgrep
               lua5_1
@@ -60,9 +59,12 @@
             servers = {
               nil_ls = {
                 enable = true;
+                packageFallback = true;
               };
               basedpyright = {
                 enable = true;
+                package = null;
+                packageFallback = true;
               };
             };
           };

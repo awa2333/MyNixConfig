@@ -1,3 +1,5 @@
 # My NixOS Configuration
 
-这是我的NixOS配置，当前依然还在配置中。
+Notice I am using my `gitcode` to store misc and I am using my `nur` repository.
+
+Please modify the `user` config if you want to use my configuration.

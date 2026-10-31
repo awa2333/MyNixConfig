@@ -1,18 +1,17 @@
 {
   config,
   pkgs,
-  lib,
   ...
 }:
 {
   imports = [
-    ./musicfox.nix
     ./hyprwm
     ./fcitx5
     ./zshShell
     ./nvim
     ./firefox
     ./emacs
+    ./bilibili-tui.nix
   ];
   home = {
     stateVersion = "26.05";
@@ -26,14 +25,13 @@
       layout = "us";
     };
     packages = with pkgs; [
+      kanban
       sops
       wpsoffice-cn
-      wechat
-      bilibili-tui
       telegram-desktop
       unzip
-      hyprlauncher
       qq
+      wechat
     ];
     pointerCursor = {
       enable = true;
@@ -43,22 +41,23 @@
     };
     sessionVariables = {
       NIXOS_OZONE_WL = 1;
+      KANBAN_FILE = "${config.home.homeDirectory}/.boards.json";
     };
+    backupFileExtension = "bak";
   };
-  nixpkgs = {
-    config = import ./nixpkgs.nix { inherit lib pkgs; };
+  fonts = {
+    fontconfig = {
+      enable = true;
+      defaultFonts = {
+        monospace = [
+          "JetBrainsMono Nerd Font"
+          "Maple Mono Normal NF CN"
+        ];
+      };
+    };
   };
   xdg = {
     enable = true;
-    configFile = {
-      "nixpkgs/config.nix" = {
-        force = true;
-        text = ''
-          with import <nixpkgs> { };
-          ${lib.fileContents ./nixpkgs.nix}
-        '';
-      };
-    };
     mimeApps = {
       enable = true;
       defaultApplications = {
@@ -119,8 +118,7 @@
       enable = true;
     };
     nh = {
-      osFlake = /etc/nixos;
-      homeFlake = "${config.xdg.configHome}/home-manager";
+      flake = "${config.home.homeDirectory}/.nixconfiguration";
       enable = true;
     };
     yazi = {
@@ -192,6 +190,9 @@
         enable = true;
       };
     };
+    nix-index = {
+      enable = true;
+    };
     less = {
       enable = true;
       config = builtins.concatStringsSep "\n" [
@@ -201,23 +202,55 @@
     };
     kitty = {
       enable = true;
-      font = {
-        name = "Maple Mono Normal NF CN";
-      };
-      themeFile = "OneDark-Pro";
       settings = {
         cursor_trail = 1;
-        background_opacity = 0.7;
       };
     };
-  };
-  sops = {
-    age = {
-      keyFile = "${config.home.homeDirectory}/.age-key.txt";
+    devenv = {
+      enable = true;
+      settings = {
+        shell = {
+          prompt_prefix = false;
+        };
+      };
     };
-    defaultSopsFile = ./secrets/secrets.yaml;
-    secrets = {
-      neteaseCookie = { };
+    bilibili-tui = {
+      enable = true;
+      settings = {
+        theme = "one-dark";
+        auto_play = false;
+        video_quality = "best";
+        danmaku = {
+          enabled = false;
+        };
+      };
+    };
+    obs-studio = {
+      enable = true;
+    };
+  };
+  stylix = {
+    targets = {
+      firefox = {
+        profileNames = [ "default" ];
+      };
+      neovim = {
+        enable = false;
+      };
+      kitty = {
+        variant256Colors = true;
+        colors = {
+          override = config.stylix.base16.mkSchemeAttrs "${pkgs.base16-schemes}/share/themes/onedark.yaml";
+        };
+        opacity = {
+          override = {
+            terminal = 0.7;
+          };
+        };
+      };
+      fcitx5 = {
+        enable = false;
+      };
     };
   };
 }

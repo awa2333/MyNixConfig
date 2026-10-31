@@ -20,6 +20,8 @@ return {
 				javascript = { "biome" },
 				bash = { "shfmt" },
 				cpp = { "clang-format" },
+				json = { "yamlfmt" },
+				haskell = { "fourmolu" },
 			},
 			format_on_save = {
 				timeout_ms = 500,
@@ -45,6 +47,7 @@ return {
 				"lua_ls",
 				"basedpyright",
 				"yamlls",
+				"hls",
 			})
 		end,
 	},

@@ -1,4 +1,5 @@
 {
+  pkgs,
   lib,
   ...
 }:
@@ -88,12 +89,12 @@
               Fn = workspace: default: monitor: {
                 inherit workspace monitor default;
               };
-              builtinMonitos = builtins.map (Fn "3" true) [
+              builtinMonitors = builtins.map (Fn "3" true) [
                 "eDP-1"
                 "eDP-2"
               ];
             in
-            builtinMonitos
+            builtinMonitors
             ++ (builtins.map (a: Fn (builtins.head a) (lib.last a) "HDMI-A-1") [
               [
                 "1"
@@ -146,6 +147,7 @@
             ++ switchWorkspace;
           on =
             let
+              wallpaper = "${pkgs.callPackage ./wallpaper.nix { }}/wallpaper.mp4";
               autoStartFn =
                 let
                   generatedLuaInline = cmd: ''hl.exec_cmd("${cmd}")'';
@@ -160,6 +162,9 @@
             {
               _args = autoStartFn [
                 "noctalia"
+                ''mpvpaper -vs -o \"no-audio loop\" eDP-1 ${wallpaper}''
+                ''mpvpaper -vs -o \"no-audio loop\" eDP-2 ${wallpaper}''
+                ''mpvpaper -vs -o \"no-audio loop\" HDMI-A-1 ${wallpaper}''
               ];
             };
         };
