@@ -157,7 +157,7 @@
       enable = true;
       settings = {
         init = {
-          defaultBrance = "main";
+          defaultBranch = "main";
         };
         user = {
           email = "62987171+awa2333@users.noreply.github.com";

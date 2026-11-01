@@ -40,19 +40,31 @@
             cd(){
               builtin cd "$@" && ls
             }
+
+            # Interactive, opt-in credentials: never export secrets from .zshenv.
+            musicfox() {
+              local cookie_file=${lib.escapeShellArg osConfig.sops.secrets.neteaseCookie.path}
+              if [[ ! -r "$cookie_file" ]]; then
+                print -u2 -- "musicfox: cookie secret unavailable"
+                return 1
+              fi
+              MUSICFOX_COOKIE="$(<"$cookie_file")" command ${lib.getExe pkgs.go-musicfox} "$@"
+            }
+
+            with-github-token() {
+              if (( $# == 0 )); then
+                print -u2 -- "usage: with-github-token <command> [args...]"
+                return 1
+              fi
+              local token
+              token="$(command ${lib.getExe pkgs.gh} auth token)" || return 1
+              GITHUB_TOKEN="$token" command "$@"
+            }
           '';
         in
         lib.mkMerge [
           zshConfigBefore
           zshConfig
-        ];
-      envExtra =
-        let
-          envFn = name: value: ''export ${name}="${value}"'';
-        in
-        builtins.concatStringsSep "\n" [
-          (envFn "MUSICFOX_COOKIE" "$(<${osConfig.sops.secrets.neteaseCookie.path})")
-          (envFn "GITHUB_TOKEN" "$(gh auth token)")
         ];
       plugins = [
         {

@@ -3,6 +3,10 @@
   lib,
   ...
 }:
+let
+  # Change this to "eDP-2" on models with that connector; do not duplicate workspace rules.
+  internalMonitor = "eDP-1";
+in
 {
   imports = [ ./noctalia.nix ];
   wayland = {
@@ -27,8 +31,7 @@
             in
             [
               (monitorFn "HDMI-A-1" "2560x1440@144" "0x0" (builtins.div 4.0 3.0))
-              (monitorFn "eDP-1" "1920x1080@144" "1920x0" (builtins.div 4.0 3.0))
-              (monitorFn "eDP-2" "1920x1080@144" "1920x0" (builtins.div 4.0 3.0))
+              (monitorFn internalMonitor "1920x1080@144" "1920x0" (builtins.div 4.0 3.0))
             ];
           env =
             let
@@ -56,16 +59,7 @@
               border_size = 2;
               gaps_in = 2;
               gaps_out = 2;
-              col = {
-                active_border = {
-                  colors = [
-                    "rgba(33ccffee)"
-                    "rgba(00ff99ee)"
-                  ];
-                  angle = 45;
-                };
-                inactive_border = "rgba(595959aa)";
-              };
+              # Border colors are owned by Stylix (general."col.*_border").
             };
             decoration = {
               rounding = 1;
@@ -89,12 +83,8 @@
               Fn = workspace: default: monitor: {
                 inherit workspace monitor default;
               };
-              builtinMonitors = builtins.map (Fn "3" true) [
-                "eDP-1"
-                "eDP-2"
-              ];
             in
-            builtinMonitors
+            [ (Fn "3" true internalMonitor) ]
             ++ (builtins.map (a: Fn (builtins.head a) (lib.last a) "HDMI-A-1") [
               [
                 "1"
@@ -162,8 +152,7 @@
             {
               _args = autoStartFn [
                 "noctalia"
-                ''mpvpaper -vs -o \"no-audio loop\" eDP-1 ${wallpaper}''
-                ''mpvpaper -vs -o \"no-audio loop\" eDP-2 ${wallpaper}''
+                ''mpvpaper -vs -o \"no-audio loop\" ${internalMonitor} ${wallpaper}''
                 ''mpvpaper -vs -o \"no-audio loop\" HDMI-A-1 ${wallpaper}''
               ];
             };

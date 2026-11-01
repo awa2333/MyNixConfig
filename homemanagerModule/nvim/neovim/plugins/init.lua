@@ -20,7 +20,10 @@ return {
 				javascript = { "biome" },
 				bash = { "shfmt" },
 				cpp = { "clang-format" },
-				json = { "yamlfmt" },
+				-- YAML serializers can emit escapes that are invalid in JSON.
+				json = { "biome" },
+				jsonc = { "biome" },
+				yaml = { "yamlfmt" },
 				haskell = { "fourmolu" },
 			},
 			format_on_save = {

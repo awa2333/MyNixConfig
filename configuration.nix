@@ -234,6 +234,11 @@
     ];
   };
   nix = {
+    # Optional runtime-only credentials; never put access-tokens in nix.settings/store.
+    # See README: opt in with an encrypted sops secret after provisioning its key.
+    extraOptions = ''
+      !include /run/secrets/nix-access-tokens
+    '';
     settings = {
       experimental-features = [
         "nix-command"
@@ -305,6 +310,7 @@
       mihomoConfig = {
         format = "binary";
         sopsFile = ./mihomo-secret.yaml;
+        restartUnits = [ "mihomo.service" ];
       };
     };
   };
