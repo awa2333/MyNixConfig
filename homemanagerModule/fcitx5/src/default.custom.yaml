@@ -1,0 +1,6 @@
+patch:
+  schema_list:
+    - schema: flypy
+  ascii_composer:
+    switch_key/Shift_L: noop
+    switch_key/Shift_R: noop

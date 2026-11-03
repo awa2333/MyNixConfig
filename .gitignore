@@ -1,0 +1,5 @@
+.devenv
+.direnv
+secrets/*
+!secrets/mihomo.bin
+!secrets/secret.yaml
