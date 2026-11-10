@@ -38,6 +38,7 @@
         extraPackages =
           with pkgs;
           [
+            nixfmt
             statix
             deadnix
             markdown-oxide
@@ -74,7 +75,7 @@
               nvim-lint
               venv-selector-nvim
               typst-preview-nvim
-              (nvim-treesitter.withAllGrammars)
+              nvim-treesitter.withAllGrammars
               markdown-preview-nvim
               better-escape-nvim
               yazi-nvim

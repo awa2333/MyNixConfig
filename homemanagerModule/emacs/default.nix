@@ -4,7 +4,7 @@
   ...
 }:
 {
-  config = lib.mkIf (config.programs.emacs.enable) {
+  config = lib.mkIf config.programs.emacs.enable {
     programs = {
       emacs = {
         extraConfig = lib.fileContents ./init.el;

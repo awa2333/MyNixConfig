@@ -18,7 +18,7 @@
           "browser.engagement.sidebar-button.has-used" = true;
           "browser.toolbarbuttons.introduced.sidebar-button" = true;
         };
-        RequestedLocales = [ "en-US" ];
+        RequestedLocales = [ "zh-CN" ];
         AppAutoUpdate = false;
         BackgroundAppUpdate = false;
         DisableFirefoxStudies = true;
@@ -76,9 +76,7 @@
                     "map J nextTab"
                     "map K previousTab"
                   ];
-                  userDefinedCss = lib.fileContents (
-                    "${pkgs.callPackage ./vimium-c-catppuccin.nix { }}/macchiato.css"
-                  );
+                  userDefinedCss = lib.fileContents "${pkgs.callPackage ./vimium-c-catppuccin.nix { }}/macchiato.css";
                 };
               };
               "uBlock0@raymondhill.net" = {

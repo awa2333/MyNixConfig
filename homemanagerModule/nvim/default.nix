@@ -14,6 +14,6 @@
     };
   };
   config = {
-    currentNeovim = "neovim";
+    currentNeovim = "nixvim";
   };
 }

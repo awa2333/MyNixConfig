@@ -31,23 +31,6 @@
     graphics = {
       enable = true;
     };
-    nvidia = {
-      open = true;
-      modesetting = {
-        enable = true;
-      };
-      prime = {
-        offload = {
-          enable = true;
-          enableOffloadCmd = true;
-        };
-        nvidiaBusId = "PCI:1@0:0:0";
-        amdgpuBusId = "PCI:6@0:0:0";
-      };
-      powerManagement = {
-        enable = true;
-      };
-    };
     keyboard = {
       qmk = {
         enable = true;
@@ -117,6 +100,9 @@
         };
       };
     };
+    firewalld = {
+      enable = true;
+    };
   };
   users = {
     mutableUsers = false;
@@ -154,8 +140,7 @@
     ];
   };
   nix = {
-    # Optional runtime-only credentials; never put access-tokens in nix.settings/store.
-    # See README: opt in with an encrypted sops secret after provisioning its key.
+    package = pkgs.lixPackageSets.stable.lix;
     extraOptions = ''
       !include ${config.sops.secrets.githubToken.path}
     '';
@@ -287,6 +272,25 @@
       enable = true;
       dns = "none";
     };
+    firewall = {
+      allowedTCPPorts = [
+        80
+        443
+      ];
+      allowedUDPPortRanges = [
+        {
+          from = 4000;
+          to = 4007;
+        }
+        {
+          from = 8000;
+          to = 8010;
+        }
+      ];
+    };
+    nftables = {
+      enable = true;
+    };
   };
   systemd = {
     services = {
@@ -299,6 +303,7 @@
     };
     tmpfiles = {
       rules = [
+        "L+ /etc/nixos - - - - ${config.users.users.luke.home}/.nixconfiguration"
         "L+ /var/lib/mihomo/GeoSite.dat - - - - ${pkgs.v2ray-rules-dat}/share/v2ray/geosite.dat"
         "L+ /var/lib/mihomo/GeoIP.dat - - - - ${pkgs.v2ray-rules-dat}/share/v2ray/geoip.dat"
       ];

@@ -69,6 +69,9 @@
           file = "share/zsh/zsh-autopair/autopair.zsh";
         }
       ];
+      historySubstringSearch = {
+        enable = true;
+      };
       history = {
         ignorePatterns = [
           "rm *"

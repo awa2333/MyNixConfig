@@ -2,12 +2,14 @@
   outputs =
     {
       self,
+      nixos-hardware,
       stylix,
       nixpkgs,
       home-manager,
       sops-nix,
       nixvim,
       nur,
+      nix-index-database,
       devenv,
       systems,
       ...
@@ -19,6 +21,12 @@
       overlays = {
         default = final: prev: {
           miscFiles = final.callPackage ./misc.nix { };
+          inherit (prev.lixPackageSets.stable)
+            nixpkgs-revew
+            nix-eval-jobs
+            nix-fast-build
+            colmena
+            ;
         };
       };
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
@@ -26,18 +34,22 @@
         modules = [
           { nixpkgs.overlays = [ self.overlays.default ]; }
           ./configuration.nix
+          nixos-hardware.nixosModules.asus-fa507rm
           sops-nix.nixosModules.sops
           nur.modules.nixos.default
           stylix.nixosModules.stylix
           home-manager.nixosModules.home-manager
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = { inherit inputs; };
-            home-manager.users.luke = ./homemanagerModule;
-            home-manager.sharedModules = [
-              nixvim.homeModules.nixvim
-            ];
+            home-manager = {
+              useUserPackages = true;
+              useGlobalPkgs = true;
+              extraSpecialArgs = { inherit inputs; };
+              users.luke = ./homemanagerModule;
+              sharedModules = [
+                nixvim.homeModules.nixvim
+                nix-index-database.homeModules.default
+              ];
+            };
           }
         ];
       };
@@ -64,6 +76,14 @@
     nixpkgs = {
       url = "github:NixOS/nixpkgs/nixos-unstable";
     };
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs = {
@@ -82,6 +102,14 @@
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs";
+        };
+      };
+    };
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
       inputs = {
         nixpkgs = {
           follows = "nixpkgs";

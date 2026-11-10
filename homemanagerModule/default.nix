@@ -1,8 +1,6 @@
 {
-  lib,
   config,
   pkgs,
-  osConfig,
   ...
 }:
 {
@@ -27,10 +25,10 @@
       layout = "us";
     };
     packages = with pkgs; [
+      trash-cli
       kanban
       sops
       wpsoffice-cn
-      telegram-desktop
       unzip
       qq
       wechat
@@ -46,25 +44,12 @@
     };
     backupFileExtension = "bak";
   };
-  fonts = {
-    fontconfig = {
-      enable = true;
-      defaultFonts = {
-        monospace = [
-          "JetBrainsMono Nerd Font"
-          "Maple Mono Normal NF CN"
-        ];
-      };
-    };
-  };
   xdg = {
     enable = true;
     mimeApps = {
       enable = true;
       defaultApplications = {
         "application/pdf" = "firefox.desktop";
-        "x-scheme-handler/tg" = "org.telegram.desktop.desktop";
-        "x-scheme-handler/tonsite" = "org.telegram.desktop.desktop";
       };
     };
   };
@@ -109,9 +94,6 @@
         };
       };
     };
-    element-desktop = {
-      enable = true;
-    };
     hstr = {
       enable = true;
     };
@@ -127,14 +109,16 @@
       shellWrapperName = "yz";
       initLua = ./yazi.lua;
       plugins = with pkgs.yaziPlugins; {
-        git = git;
-        sudo = sudo;
-        diff = diff;
-        mount = mount;
-        chmod = chmod;
-        starship = starship;
-        vcs-files = vcs-files;
-        bookmarks = bookmarks;
+        inherit
+          git
+          sudo
+          diff
+          mount
+          chmod
+          starship
+          vcs-files
+          bookmarks
+          ;
       };
       keymap = {
         mgr = {
@@ -191,8 +175,10 @@
         enable = true;
       };
     };
-    nix-index = {
-      enable = true;
+    nix-index-database = {
+      comma = {
+        enable = true;
+      };
     };
     less = {
       enable = true;
@@ -229,6 +215,42 @@
     obs-studio = {
       enable = true;
     };
+    fzf = {
+      enable = true;
+      defaultCommand = "fd --type f";
+    };
+    fd = {
+      enable = true;
+      ignores = [
+        "*.bak"
+      ];
+    };
+    bat = {
+      enable = true;
+    };
+    ssh = {
+      enable = true;
+      settings = {
+        github = {
+          HostName = "github.com";
+          User = "git";
+        };
+      };
+    };
+    btop = {
+      enable = true;
+    };
+  };
+  fonts = {
+    fontconfig = {
+      enable = true;
+      defaultFonts = {
+        monospace = [
+          "JetBrainsMono Nerd Font"
+          "Maple Mono Normal NF CN"
+        ];
+      };
+    };
   };
   stylix = {
     targets = {
@@ -241,7 +263,9 @@
       kitty = {
         variant256Colors = true;
         colors = {
-          override = config.stylix.base16.mkSchemeAttrs "${pkgs.base16-schemes}/share/themes/onedark.yaml";
+          override =
+            (config.stylix.base16.mkSchemeAttrs "${pkgs.base16-schemes}/share/themes/onedark.yaml").override
+              { base00 = "282c35"; };
         };
         opacity = {
           override = {

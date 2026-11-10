@@ -4,7 +4,6 @@
   ...
 }:
 let
-  # Change this to "eDP-2" on models with that connector; do not duplicate workspace rules.
   internalMonitor = "eDP-1";
 in
 {
@@ -47,14 +46,11 @@ in
             in
             [
               (envFn "XCURSOR_SIZE" "24")
-              (envFn "LIBVA_DRIVER_NAME" "nvidia")
-              (envFn "__GLX_VENDOR_LIBRARY_NAME" "nvidia")
               (envFn "GDK_BACKEND" "wayland,x11,*")
               (envFn "QT_QPA_PLATFORM" "wayland;xcb")
               (envFn "SDL_VIDEODRIVER" "wayland")
               (envFn "CLUTTER_BACKEND" "wayland")
               (envFn "QT_IM_MODULES" "wayland;fcitx;ibus")
-              (envFn "QT_IM_MODULE" "fcitx")
             ];
           config = {
             render = {

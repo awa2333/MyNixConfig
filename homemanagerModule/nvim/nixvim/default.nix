@@ -6,269 +6,298 @@
 }:
 {
   config = lib.mkIf (config.currentNeovim == "nixvim") {
-    xdg.configFile = {
-      "nvim/lua/chadrc.lua" = {
-        source = ./chadrc.lua;
-      };
-    };
     programs = {
-      nixvim =
-        let
-          helpers = config.lib.nixvim;
-        in
-        {
-          enable = true;
-          defaultEditor = true;
-          viAlias = true;
-          vimAlias = true;
-          extraPackages =
-            with pkgs;
-            [
-              python3
-              ripgrep
-              lua5_1
-            ]
-            ++ (with pkgs.lua51Packages; [
-              jsregexp
-              tree-sitter-cli
-              luarocks
-            ]);
-          globals = {
-            mapleader = " ";
-            base46_cache = helpers.mkRaw "vim.fn.stdpath(\"data\") .. \"/base46/\"";
-          };
-          opts = {
-            relativenumber = true;
-          };
-          extraConfigLuaPre = ''
-            if not vim.loop.fs_stat(vim.g.base46_cache) then
-            	require("base46").load_all_highlights()
-            end
-          '';
-          extraConfigLuaPost = ''
-            dofile(vim.g.base46_cache .. "defaults")
-            dofile(vim.g.base46_cache .. "statusline")
-            require("nvchad.options")
-            require("nvchad.autocmds")
-            vim.schedule(function()
-              require "nvchad.mappings"
-            end)
-
-          '';
+      nixvim = {
+        enable = true;
+        viAlias = true;
+        vimAlias = true;
+        vimdiffAlias = true;
+        defaultEditor = true;
+        extraPackages = with pkgs; [
+          mermaid-cli
+          tectonic
+          ripgrep
+          tree-sitter
+          nixfmt
+          deadnix
+          statix
+          ghostscript_headless
+        ];
+        globals = {
+          mapleader = " ";
+        };
+        opts = {
+          number = true;
+          relativenumber = true;
+          shiftwidth = 2;
+          expandtab = true;
+          undofile = true;
+          cursorline = true;
+          hlsearch = false;
+          incsearch = true;
+          signcolumn = "yes";
+        };
+        keymaps = [
+          {
+            mode = [ "n" ];
+            key = "<leader>-";
+            action = ":lua require('oil').toggle_float()<CR>";
+            options = {
+              desc = "Open Oil Float";
+            };
+          }
+          {
+            mode = [ "n" ];
+            key = "<leader>e";
+            action = ":lua Snacks.explorer()<CR>";
+            options = {
+              desc = "File Explorer";
+            };
+          }
+          {
+            mode = [ "n" ];
+            key = "<leader>.";
+            action = ":lua Snacks.scratch()<CR>";
+            options = {
+              desc = "Toggle Scratch Buffer";
+            };
+          }
+          {
+            mode = "n";
+            key = "<leader>z";
+            action = ":lua Snacks.zen()<CR>";
+            options = {
+              desc = "Toggle Zen Mode";
+            };
+          }
+          {
+            mode = "n";
+            key = "<leader>Z";
+            action = ":lua Snacks.zen.zoom()<CR>";
+            options = {
+              desc = "Toggle Zoom";
+            };
+          }
+        ];
+        plugins = {
           lsp = {
+            enable = true;
             servers = {
-              nil_ls = {
+              nixd = {
                 enable = true;
-                packageFallback = true;
               };
-              basedpyright = {
+              hls = {
                 enable = true;
                 package = null;
-                packageFallback = true;
+                installGhc = false;
               };
             };
           };
-          plugins = {
-            lazy = {
-              enable = true;
-              autoLoad = true;
-              plugins = with pkgs.vimPlugins; [
-                telescope-nvim
-                mason-nvim
-                blink-cmp
-                base46
-                friendly-snippets
-                indent-blankline-nvim
-                nvzone-menu
-                nvzone-minty
-                nvzone-volt
-                nvim-autopairs
-                nvim-tree-lua
-                nvim-web-devicons
-                plenary-nvim
-                which-key-nvim
-                gitsigns-nvim
+          lint = {
+            enable = true;
+            lintersByFt = {
+              nix = [
+                "deadnix"
+                "statix"
               ];
-              settings = with pkgs.vimPlugins; {
-                spec = [
-                  {
-                    name = lib.getName nvim-lspconfig;
-                    dir = "${nvim-lspconfig}";
-                    config =
-                      let
-                        servers = builtins.concatStringsSep "," (
-                          builtins.map (a: "\"" + a + "\"") [
-                            "rumdl"
-                            "markdown_oxide"
-                            "bashls"
-                            "tinymist"
-                            "taplo"
-                            "ruff"
-                            "biome"
-                            "nil_ls"
-                            "lua_ls"
-                            "basedpyright"
-                            "yamlls"
-                          ]
-                        );
-                      in
-                      helpers.mkRaw ''
-                        function()
-                          require("nvchad.configs.lspconfig").defaults()
-                          vim.lsp.enable({${servers}})
-                        end
-                      '';
-                  }
-                  {
-                    name = lib.getName nvim-treesitter;
-                    dir = "${nvim-treesitter}";
-                    dependencies = [
-                      {
-                        name = lib.getName rainbow-delimiters-nvim;
-                        dir = "${rainbow-delimiters-nvim}";
-                      }
-                    ];
-                    opts = {
-                      auto_install = false;
-                    };
-                  }
-                  {
-                    name = lib.getName todo-comments-nvim;
-                    dir = "${todo-comments-nvim}";
-                    event = "User FilePost";
-                  }
-                  {
-                    name = lib.getName conform-nvim;
-                    dir = "${conform-nvim}";
-                    event = "BufWritePre";
-                    opts = {
-                      formatters_by_ft = {
-                        markdown = [ "rumdl" ];
-                        typst = [ "typstyle" ];
-                        lua = [ "stylua" ];
-                        nix = [ "nixfmt" ];
-                        javascript = [ "biome" ];
-                        bash = [ "shfmt" ];
-                      };
-                      format_on_save = {
-                        timeout_ms = 500;
-                        lsp_fallback = true;
-                      };
-
-                    };
-                  }
-                  {
-                    name = lib.getName better-escape-nvim;
-                    dir = "${better-escape-nvim}";
-                    event = [
-                      "CmdLineEnter"
-                      "InsertEnter"
-                    ];
-                    opts = {
-                      timeout = helpers.mkRaw "vim.o.timeoutlen";
-                      default_mappings = true;
-                      mappings = {
-                        i = {
-                          j = {
-                            k = "<Esc>";
-                          };
-                        };
-                        c = {
-                          j = {
-                            k = "C-c";
-                          };
-                        };
-                      };
-                    };
-                  }
-                  {
-                    name = "LuaSnip";
-                    dir = "${luasnip}";
-                  }
-                  {
-                    name = lib.getName nvchad;
-                    dir = "${nvchad.overrideAttrs {
-                      dependencies = with self; [
-                        gitsigns-nvim
-                        luasnip
-                        mason-nvim
-                        nvim-lspconfig
-                        telescope-nvim
-                        nvchad-ui
-                      ];
-                    }}";
-                    lazy = false;
-                    import = "nvchad.plugins";
-                  }
-                  {
-                    name = "ui";
-                    dir = "${nvchad-ui}";
-                  }
-                  {
-                    import = "nvchad.blink.lazyspec";
-                  }
+            };
+          };
+          which-key = {
+            enable = true;
+          };
+          blink-cmp = {
+            enable = true;
+            settings = {
+              signature = {
+                enabled = true;
+              };
+              keymap = {
+                preset = "none";
+                "<CR>" = [
+                  "accept"
+                  "fallback"
                 ];
-                defaults = {
-                  lazy = true;
-                };
-                install = {
-                  colorscheme = [
-                    "nvchad"
-                  ];
-                };
-                change_detection = {
-                  notify = false;
-                };
-                install = {
-                  missing = false;
-                };
-                ui = {
-                  icons = {
-                    ft = "";
-                    lazy = "󰂠 ";
-                    loaded = "";
-                    not_loaded = "";
-                  };
-                };
-                performance = {
-                  reset_packpath = true;
-                  rtp = {
-                    reset = true;
-                    disabled_plugins = [
-                      "2html_plugin"
-                      "tohtml"
-                      "getscript"
-                      "getscriptPlugin"
-                      "gzip"
-                      "logipat"
-                      "netrw"
-                      "netrwPlugin"
-                      "netrwSettings"
-                      "netrwFileHandlers"
-                      "matchit"
-                      "tar"
-                      "tarPlugin"
-                      "rrhelper"
-                      "spellfile_plugin"
-                      "vimball"
-                      "vimballPlugin"
-                      "zip"
-                      "zipPlugin"
-                      "tutor"
-                      "rplugin"
-                      "syntax"
-                      "synmenu"
-                      "optwin"
-                      "compiler"
-                      "bugreport"
-                      "ftplugin"
-                    ];
+                "<Tab>" = [
+                  "select_next"
+                  "snippet_forward"
+                  "fallback"
+                ];
+                "<S-Tab>" = [
+                  "select_prev"
+                  "snippet_backward"
+                  "fallback"
+                ];
+              };
+              sources = {
+                default = [
+                  "lsp"
+                  "path"
+                  "snippets"
+                  "buffer"
+                  "ripgrep"
+                ];
+                providers = {
+                  ripgrep = {
+                    module = "blink-ripgrep";
+                    name = "Ripgrep";
                   };
                 };
               };
+            };
+          };
+          blink-pairs = {
+            enable = true;
+          };
+          blink-ripgrep = {
+            enable = true;
+          };
+          treesitter = {
+            enable = true;
+            grammarPackages =
+              with config.programs.nixvim.plugins.treesitter.package.builtGrammars;
+              [
+                css
+                html
+                javascript
+                latex
+                scss
+                svelte
+                tsx
+                typst
+                vue
+                regex
+
+                haskell
+                python
+                nix
+              ]
+              ++ [
+                pkgs.tree-sitter-grammars.tree-sitter-norg
+              ];
+            highlight = {
+              enable = true;
+            };
+          };
+          better-escape = {
+            enable = true;
+          };
+          lsp-lines = {
+            enable = true;
+          };
+          conform-nvim = {
+            enable = true;
+            autoInstall = {
+              enable = false;
+            };
+            settings = {
+              formatters_by_ft = {
+                nix = [ "nixfmt" ];
+                haskell = [ "fourmolu" ];
+              };
+              format_on_save = {
+                timeout_ms = 500;
+                lsp_format = "fallback";
+              };
+            };
+          };
+          treesitter-context = {
+            enable = true;
+            settings = {
+              line_numbers = true;
+              max_lines = 3;
+            };
+          };
+          lualine = {
+            enable = true;
+          };
+          mini-icons = {
+            enable = true;
+            mockDevIcons = true;
+          };
+          friendly-snippets = {
+            enable = true;
+          };
+          snacks = {
+            enable = true;
+            settings = {
+              statuscolumn = {
+                enabled = true;
+              };
+              dashboard = {
+                enabled = true;
+                sections = [
+                  { section = "header"; }
+                  {
+                    section = "keys";
+                    gap = 1;
+                    padding = 1;
+                  }
+                ];
+              };
+              bigfile = {
+                enabled = true;
+              };
+              quickfile = {
+                enabled = true;
+              };
+              words = {
+                enabled = true;
+              };
+              notifier = {
+                enabled = true;
+              };
+              input = {
+                enabled = true;
+              };
+              explorer = {
+                enabled = true;
+              };
+              image = {
+                enabled = true;
+              };
+              picker = {
+                enabled = true;
+                db = {
+                  sqlite3_path = "${pkgs.sqlite.out}/lib/libsqlite3.so";
+                };
+              };
+              scope = {
+                enabled = true;
+              };
+              scroll = {
+                enabled = true;
+              };
+              indent = {
+                enabled = true;
+                hl = "SnacksIndent";
+              };
+              scratch = {
+                enabled = true;
+              };
+            };
+          };
+          typst-preview = {
+            enable = true;
+          };
+          oil = {
+            enable = true;
+          };
+        };
+        diagnostic = {
+          settings = {
+            virtual_text = true;
+            virtual_lines = {
+              only_current_line = true;
             };
           };
         };
+        colorschemes = {
+          onedark = {
+            enable = true;
+          };
+        };
+
+      };
     };
   };
 }
